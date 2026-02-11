@@ -184,6 +184,20 @@
       box-shadow: 0 6px 16px rgba(0, 0, 0, 0.35);
     }
 
+    .device-shell.modern-shell {
+      --shell-radius: 60px;
+      clip-path: url(#ios-continuous-corner);
+      -webkit-clip-path: url(#ios-continuous-corner);
+    }
+
+    .shape-defs {
+      position: absolute;
+      width: 0;
+      height: 0;
+      overflow: hidden;
+      pointer-events: none;
+    }
+
     .mockup-image {
       position: absolute;
       inset: 0;
@@ -340,6 +354,14 @@
   </style>
 </head>
 <body>
+  <svg class="shape-defs" aria-hidden="true" focusable="false">
+    <defs>
+      <clipPath id="ios-continuous-corner" clipPathUnits="objectBoundingBox">
+        <path d="M0.5,0 C0.72,0 0.86,0.01 0.93,0.07 C0.99,0.14 1,0.28 1,0.5 C1,0.72 0.99,0.86 0.93,0.93 C0.86,0.99 0.72,1 0.5,1 C0.28,1 0.14,0.99 0.07,0.93 C0.01,0.86 0,0.72 0,0.5 C0,0.28 0.01,0.14 0.07,0.07 C0.14,0.01 0.28,0 0.5,0 Z"></path>
+      </clipPath>
+    </defs>
+  </svg>
+
   <h1>界面 2 适配策略预览（Safe Area）</h1>
   <p class="hint">
     规则：优先在「常规展示窗」居中；放不下则向上借 66pt 顶部区并进入 safeArea；仍放不下时改为缩宽保全图。图片尺寸可选并按 16 对齐，默认仅显示 mockup 和图片展示块，悬停可查看组件名和对应高度。
@@ -499,6 +521,7 @@
       const shellW = phone.width * scale;
       const shellH = phone.height * scale;
       const shellRadius = phone.modern ? 60 : 18;
+      const shellClassName = phone.modern ? "device-shell modern-shell" : "device-shell";
 
       const styleRect = (x, y, w, h) => `left:${x * scale}px;top:${y * scale}px;width:${w * scale}px;height:${h * scale}px;`;
       const bottomPanelH = layout.bottomPanelH;
@@ -513,7 +536,7 @@
       card.className = "card";
       card.innerHTML = `
         <h3>${phone.name}</h3>
-        <div class="device-shell" style="width:${shellW}px;height:${shellH}px;--shell-radius:${shellRadius}px;">
+        <div class="${shellClassName}" style="width:${shellW}px;height:${shellH}px;--shell-radius:${shellRadius}px;">
           <img class="mockup-image" src="${mockupSrc(phone.mockup)}" alt="${phone.name} mockup" onerror="this.style.display='none'">
           <div class="layer safe-area" data-label="状态栏 / safeArea" data-height="${safeAreaH}pt" style="top:0;height:${phone.safeArea * scale}px;"></div>
           <div class="layer close-bar" data-label="顶部操作栏" data-height="${topBarH}pt" style="top:${phone.safeArea * scale}px;height:${strategy.closeBar * scale}px;"></div>
