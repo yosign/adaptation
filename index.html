@@ -381,7 +381,8 @@
     .rel-outline {
       position: absolute;
       background: transparent;
-      border: 1px solid rgba(217, 224, 239, 0.85);
+      border: 1px solid rgba(255, 255, 255, 0.95);
+      border-radius: 6px;
     }
 
     .rel-outline::after,
@@ -401,15 +402,8 @@
 
     .rel-image-source {
       position: absolute;
-      background: rgba(70, 204, 255, 0.42);
-    }
-
-    .rel-top-zone {
-      border-color: rgba(255, 190, 116, 0.95);
-    }
-
-    .rel-normal-window {
-      border-color: rgba(104, 183, 255, 0.95);
+      background: rgba(70, 204, 255, 0.52);
+      border-radius: 6px;
     }
   </style>
 </head>
@@ -665,12 +659,11 @@
           <div class="layer safe-bottom" data-label="底部安全区" data-height="${safeBottomH}pt" style="top:${(phone.height - phone.safeBottom) * scale}px;height:${phone.safeBottom * scale}px;"></div>
         </div>
         <div class="relationship-wrap">
-          <div class="relationship-title">关系图：仅显示原图填充 + 顶部边框 + 常规展示框边框，用于观察图片被切位置。</div>
+          <div class="relationship-title">关系图：原图纯色填充 + 合并矩形白色边框（顶部区+常规展示框），用于观察图片被切位置。</div>
           <div class="relationship-canvas">
             <div class="relationship-stage" style="width:${stageW}px;height:${stageH}px;">
               <div class="rel-image-source" data-rlabel="原图覆盖" style="${relRect(sourceCover.x, sourceCover.y, sourceCover.w, sourceCover.h)}"></div>
-              <div class="rel-outline rel-top-zone" data-rlabel="顶部边框" style="${relRect(0, 0, phone.width, layout.normalTop)}"></div>
-              <div class="rel-outline rel-normal-window" data-rlabel="常规展示窗" style="${relRect(0, layout.normalTop, phone.width, layout.normalH)}"></div>
+              <div class="rel-outline" data-rlabel="顶部+常规展示框" style="${relRect(0, 0, phone.width, layout.panelTop)}"></div>
             </div>
           </div>
         </div>
