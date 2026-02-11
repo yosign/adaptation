@@ -114,6 +114,10 @@
       line-height: 1.4;
     }
 
+    .strategy-note div + div {
+      margin-top: 2px;
+    }
+
     .option-group {
       display: flex;
       flex-wrap: wrap;
@@ -343,18 +347,89 @@
       transform: translateY(0);
     }
 
-    .meta {
-      margin-top: 8px;
-      font-size: 12px;
-      color: var(--muted);
-      line-height: 1.35;
+    .relationship-wrap {
+      margin-top: 10px;
+      padding: 8px;
+      border: 1px solid rgba(82, 93, 118, 0.7);
+      border-radius: 10px;
+      background: rgba(11, 15, 23, 0.7);
     }
 
-    .mode {
-      margin-top: 4px;
-      font-size: 12px;
-      font-weight: 600;
-      color: #dbe9ff;
+    .relationship-title {
+      font-size: 11px;
+      color: #b7c2d8;
+      margin-bottom: 6px;
+      line-height: 1.3;
+    }
+
+    .relationship-canvas {
+      position: relative;
+      width: 100%;
+      height: 220px;
+      border-radius: 8px;
+      background: rgba(7, 10, 16, 0.72);
+      overflow: hidden;
+    }
+
+    .relationship-stage {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+    }
+
+    .rel-outline {
+      position: absolute;
+      background: transparent;
+      border: 1px solid rgba(217, 224, 239, 0.85);
+    }
+
+    .rel-outline::after,
+    .rel-image-source::after,
+    .rel-image-box::after {
+      content: attr(data-rlabel);
+      position: absolute;
+      left: 4px;
+      top: 4px;
+      font-size: 9px;
+      color: #eef3ff;
+      background: rgba(0, 0, 0, 0.62);
+      border-radius: 999px;
+      padding: 1px 5px;
+      line-height: 1.1;
+      white-space: nowrap;
+    }
+
+    .rel-image-source {
+      position: absolute;
+      background: rgba(70, 204, 255, 0.28);
+      border: 1px solid rgba(70, 204, 255, 0.95);
+    }
+
+    .rel-image-box {
+      position: absolute;
+      background: transparent;
+      border: 1px solid rgba(146, 108, 255, 0.95);
+    }
+
+    .rel-safe-area {
+      border-color: rgba(255, 143, 143, 0.95);
+    }
+
+    .rel-top-bar {
+      border-color: rgba(255, 190, 116, 0.95);
+    }
+
+    .rel-normal-window {
+      border-color: rgba(104, 183, 255, 0.95);
+    }
+
+    .rel-bottom-panel {
+      border-color: rgba(255, 170, 90, 0.95);
+    }
+
+    .rel-safe-bottom {
+      border-color: rgba(137, 150, 183, 0.95);
     }
   </style>
 </head>
@@ -452,22 +527,35 @@
       return Math.round(v / 16) * 16;
     }
 
-    function modeText(mode, closeBar) {
-      if (mode === "fill-3-4") return "3:4 铺满展示区";
-      if (mode === "normal") return "常规居中（不借顶部）";
-      if (mode === "expanded") return `借顶部 ${closeBar}pt 居中`;
-      return "兜底缩宽（保全图）";
+    function computeCoverRect(boxW, boxH, boxX, boxY, srcW, srcH) {
+      const coverScale = Math.max(boxW / srcW, boxH / srcH);
+      const drawW = srcW * coverScale;
+      const drawH = srcH * coverScale;
+      const drawX = boxX + (boxW - drawW) / 2;
+      const drawY = boxY + (boxH - drawH) / 2;
+      return { x: drawX, y: drawY, w: drawW, h: drawH };
     }
 
-    function strategyDescription(strategy, imgW, imgH) {
-      const isThreeByFour = imgW === 864 && imgH === 1184;
-      if (strategy.id === "scheme_1") {
-        if (isThreeByFour) {
-          return "方案1：3:4（864×1184）直接铺满展示区；其他比例按“先居中、再上借、最后保全图”处理。";
-        }
-        return "方案1：默认先常规居中，放不下就上借顶部，仍放不下则缩宽保全图。";
+    function strategyLineForPreset(preset, strategy) {
+      const counts = { "fill-3-4": 0, normal: 0, expanded: 0, shrink: 0 };
+      const w = snap16(preset.w);
+      const h = snap16(preset.h);
+
+      phones.forEach((phone) => {
+        const result = computeLayout(phone, w, h, strategy);
+        counts[result.mode] = (counts[result.mode] || 0) + 1;
+      });
+
+      if (counts["fill-3-4"] === phones.length) {
+        return `${preset.label}：全部机型铺满展示区。`;
       }
-      return "";
+
+      return `${preset.label}：常规居中 ${counts.normal} 台，借顶部 ${counts.expanded} 台，缩宽保全 ${counts.shrink} 台。`;
+    }
+
+    function renderStrategyNote(strategy) {
+      const lines = presets.map((preset) => strategyLineForPreset(preset, strategy));
+      el.strategyNote.innerHTML = lines.map((line) => `<div>${line}</div>`).join("");
     }
 
     function mockupSrc(fileName) {
@@ -566,6 +654,13 @@
       const imageAreaH = Math.round(layout.imageH);
       const uiPanelH = Math.round(bottomPanelH);
       const safeBottomH = Math.round(phone.safeBottom);
+      const sourceCover = computeCoverRect(layout.imageW, layout.imageH, layout.imageX, layout.imageY, imgW, imgH);
+
+      const relationCanvasH = 220;
+      const relationScale = Math.min((shellW - 24) / phone.width, (relationCanvasH - 16) / phone.height);
+      const relRect = (x, y, w, h) => `left:${x * relationScale}px;top:${y * relationScale}px;width:${w * relationScale}px;height:${h * relationScale}px;`;
+      const stageW = phone.width * relationScale;
+      const stageH = phone.height * relationScale;
 
       const card = document.createElement("article");
       card.className = "card";
@@ -582,11 +677,20 @@
           <div class="layer bottom-panel" data-label="底部UI组件" data-height="${uiPanelH}pt" style="top:${layout.panelTop * scale}px;height:${bottomPanelH * scale}px;"></div>
           <div class="layer safe-bottom" data-label="底部安全区" data-height="${safeBottomH}pt" style="top:${(phone.height - phone.safeBottom) * scale}px;height:${phone.safeBottom * scale}px;"></div>
         </div>
-        <div class="meta">屏幕 ${phone.width}×${phone.height} · safeArea ${phone.safeArea} · safeBottom ${phone.safeBottom}</div>
-        <div class="meta">mockup：${phone.mockup || "未匹配"}</div>
-        <div class="meta">底部组件 ${layout.bottomPanelH}（含 safeBottom ${phone.safeBottom}）· 目标适配高 ${layout.targetAreaH}</div>
-        <div class="meta">图片展示 ${Math.round(layout.imageW)}×${Math.round(layout.imageH)}（源图 ${imgW}×${imgH}）</div>
-        <div class="mode">${modeText(layout.mode, strategy.closeBar)}</div>
+        <div class="relationship-wrap">
+          <div class="relationship-title">关系图：蓝色块表示“原图完整覆盖范围”，其他均为组件描边。</div>
+          <div class="relationship-canvas">
+            <div class="relationship-stage" style="width:${stageW}px;height:${stageH}px;">
+              <div class="rel-image-source" data-rlabel="原图覆盖" style="${relRect(sourceCover.x, sourceCover.y, sourceCover.w, sourceCover.h)}"></div>
+              <div class="rel-image-box" data-rlabel="图片展示块" style="${relRect(layout.imageX, layout.imageY, layout.imageW, layout.imageH)}"></div>
+              <div class="rel-outline rel-safe-area" data-rlabel="safeArea" style="${relRect(0, 0, phone.width, phone.safeArea)}"></div>
+              <div class="rel-outline rel-top-bar" data-rlabel="顶部操作栏" style="${relRect(0, phone.safeArea, phone.width, strategy.closeBar)}"></div>
+              <div class="rel-outline rel-normal-window" data-rlabel="常规展示窗" style="${relRect(0, layout.normalTop, phone.width, layout.normalH)}"></div>
+              <div class="rel-outline rel-bottom-panel" data-rlabel="底部UI组件" style="${relRect(0, layout.panelTop, phone.width, bottomPanelH)}"></div>
+              <div class="rel-outline rel-safe-bottom" data-rlabel="底部安全区" style="${relRect(0, phone.height - phone.safeBottom, phone.width, phone.safeBottom)}"></div>
+            </div>
+          </div>
+        </div>
       `;
 
       return card;
@@ -627,7 +731,7 @@
 
       renderOptions();
       updateRatioText(imgW, imgH);
-      el.strategyNote.textContent = strategyDescription(strategy, imgW, imgH);
+      renderStrategyNote(strategy);
 
       el.cards.innerHTML = "";
       phones.forEach((phone) => {
