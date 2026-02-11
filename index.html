@@ -546,16 +546,21 @@
         counts[result.mode] = (counts[result.mode] || 0) + 1;
       });
 
-      if (counts["fill-3-4"] === phones.length) {
-        return `${preset.label}：全部机型铺满展示区。`;
-      }
-
-      return `${preset.label}：常规居中 ${counts.normal} 台，借顶部 ${counts.expanded} 台，缩宽保全 ${counts.shrink} 台。`;
+      const branchText = preset.id === "3_4" ? "触发策略2（3:4特例）" : "触发策略3（通用分支）";
+      const fillText = counts["fill-3-4"] > 0 ? `，铺满 ${counts["fill-3-4"]} 台` : "";
+      return `${preset.label}：${branchText}，常规居中 ${counts.normal} 台，借顶部 ${counts.expanded} 台，缩宽保全 ${counts.shrink} 台${fillText}。`;
     }
 
     function renderStrategyNote(strategy) {
       const lines = presets.map((preset) => strategyLineForPreset(preset, strategy));
-      el.strategyNote.innerHTML = lines.map((line) => `<div>${line}</div>`).join("");
+      const introLines = [
+        "<div><strong>完整策略（适配方案1）</strong></div>",
+        "<div>1) 先定展示边界：normalTop = safeArea + 顶部操作栏(66) + gap(0)，panelTop = 屏高 - 底部UI，normalH = panelTop - normalTop，expandedH = panelTop。</div>",
+        "<div>2) 3:4特例：输入 864×1184 时，图片展示块直接铺满 [x=0, y=0, w=屏宽, h=panelTop]。</div>",
+        "<div>3) 非3:4走通用分支：fitH = 屏宽×图高/图宽；fitH ≤ normalH 用常规居中；fitH ≤ expandedH 用借顶部居中；否则缩宽保全图。</div>",
+        "<div><strong>各尺寸在该策略下</strong></div>"
+      ];
+      el.strategyNote.innerHTML = introLines.concat(lines.map((line) => `<div>${line}</div>`)).join("");
     }
 
     function mockupSrc(fileName) {
