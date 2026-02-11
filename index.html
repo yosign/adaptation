@@ -107,6 +107,13 @@
       font-size: 12px;
     }
 
+    .strategy-note {
+      margin-top: 6px;
+      color: #b9c5dc;
+      font-size: 12px;
+      line-height: 1.4;
+    }
+
     .option-group {
       display: flex;
       flex-wrap: wrap;
@@ -180,7 +187,7 @@
       overflow: hidden;
       isolation: isolate;
       border: 2px solid #ffffff;
-      background: #080a0f;
+      background: #ffffff;
       box-shadow: 0 6px 16px rgba(0, 0, 0, 0.35);
     }
 
@@ -375,6 +382,7 @@
     <div class="control control-wide">
       <label>适配策略</label>
       <div class="option-group" id="strategyOptions"></div>
+      <div class="strategy-note" id="strategyNote"></div>
     </div>
     <div class="control">
       <label>当前图片比例</label>
@@ -436,6 +444,7 @@
     const el = {
       sizeOptions: document.getElementById("sizeOptions"),
       strategyOptions: document.getElementById("strategyOptions"),
+      strategyNote: document.getElementById("strategyNote"),
       ratioText: document.getElementById("ratioText"),
       cards: document.getElementById("cards")
     };
@@ -446,9 +455,21 @@
     }
 
     function modeText(mode, closeBar) {
+      if (mode === "fill-3-4") return "3:4 铺满展示区";
       if (mode === "normal") return "常规居中（不借顶部）";
       if (mode === "expanded") return `借顶部 ${closeBar}pt 居中`;
       return "兜底缩宽（保全图）";
+    }
+
+    function strategyDescription(strategy, imgW, imgH) {
+      const isThreeByFour = imgW === 864 && imgH === 1184;
+      if (strategy.id === "scheme_1") {
+        if (isThreeByFour) {
+          return "方案1：3:4（864×1184）直接铺满展示区；其他比例按“先居中、再上借、最后保全图”处理。";
+        }
+        return "方案1：默认先常规居中，放不下就上借顶部，仍放不下则缩宽保全图。";
+      }
+      return "";
     }
 
     function mockupSrc(fileName) {
@@ -482,12 +503,28 @@
       const expandedTop = 0;
       const expandedH = panelTop - expandedTop;
       const fitH = phone.width * ratioHW;
+      const isThreeByFourPreset = imgW === 864 && imgH === 1184;
 
       let imageW = phone.width;
       let imageH = fitH;
       let imageX = 0;
       let imageY = normalTop + (normalH - fitH) / 2;
       let mode = "normal";
+
+      if (isThreeByFourPreset) {
+        return {
+          mode: "fill-3-4",
+          normalTop,
+          normalH,
+          panelTop,
+          targetAreaH: phone.targetAreaH,
+          bottomPanelH: phone.bottomPanelH,
+          imageW: phone.width,
+          imageH: expandedH,
+          imageX: 0,
+          imageY: expandedTop
+        };
+      }
 
       if (fitH <= normalH) {
         mode = "normal";
@@ -592,6 +629,7 @@
 
       renderOptions();
       updateRatioText(imgW, imgH);
+      el.strategyNote.textContent = strategyDescription(strategy, imgW, imgH);
 
       el.cards.innerHTML = "";
       phones.forEach((phone) => {
