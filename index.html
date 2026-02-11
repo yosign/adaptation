@@ -349,7 +349,7 @@
 
     .relationship-wrap {
       margin-top: 10px;
-      padding: 8px;
+      padding: 12px;
       border: 1px solid rgba(82, 93, 118, 0.7);
       border-radius: 10px;
       background: rgba(11, 15, 23, 0.7);
@@ -365,7 +365,7 @@
     .relationship-canvas {
       position: relative;
       width: 100%;
-      height: 220px;
+      height: 240px;
       border-radius: 8px;
       background: rgba(7, 10, 16, 0.72);
       overflow: hidden;
@@ -385,8 +385,7 @@
     }
 
     .rel-outline::after,
-    .rel-image-source::after,
-    .rel-image-box::after {
+    .rel-image-source::after {
       content: attr(data-rlabel);
       position: absolute;
       left: 4px;
@@ -402,34 +401,15 @@
 
     .rel-image-source {
       position: absolute;
-      background: rgba(70, 204, 255, 0.28);
-      border: 1px solid rgba(70, 204, 255, 0.95);
+      background: rgba(70, 204, 255, 0.42);
     }
 
-    .rel-image-box {
-      position: absolute;
-      background: transparent;
-      border: 1px solid rgba(146, 108, 255, 0.95);
-    }
-
-    .rel-safe-area {
-      border-color: rgba(255, 143, 143, 0.95);
-    }
-
-    .rel-top-bar {
+    .rel-top-zone {
       border-color: rgba(255, 190, 116, 0.95);
     }
 
     .rel-normal-window {
       border-color: rgba(104, 183, 255, 0.95);
-    }
-
-    .rel-bottom-panel {
-      border-color: rgba(255, 170, 90, 0.95);
-    }
-
-    .rel-safe-bottom {
-      border-color: rgba(137, 150, 183, 0.95);
     }
   </style>
 </head>
@@ -661,8 +641,10 @@
       const safeBottomH = Math.round(phone.safeBottom);
       const sourceCover = computeCoverRect(layout.imageW, layout.imageH, layout.imageX, layout.imageY, imgW, imgH);
 
-      const relationCanvasH = 220;
-      const relationScale = Math.min((shellW - 24) / phone.width, (relationCanvasH - 16) / phone.height);
+      const relationCanvasH = 240;
+      const relationPaddingX = 36;
+      const relationPaddingY = 20;
+      const relationScale = Math.min((shellW - relationPaddingX * 2) / phone.width, (relationCanvasH - relationPaddingY * 2) / phone.height);
       const relRect = (x, y, w, h) => `left:${x * relationScale}px;top:${y * relationScale}px;width:${w * relationScale}px;height:${h * relationScale}px;`;
       const stageW = phone.width * relationScale;
       const stageH = phone.height * relationScale;
@@ -683,16 +665,12 @@
           <div class="layer safe-bottom" data-label="底部安全区" data-height="${safeBottomH}pt" style="top:${(phone.height - phone.safeBottom) * scale}px;height:${phone.safeBottom * scale}px;"></div>
         </div>
         <div class="relationship-wrap">
-          <div class="relationship-title">关系图：蓝色块表示“原图完整覆盖范围”，其他均为组件描边。</div>
+          <div class="relationship-title">关系图：仅显示原图填充 + 顶部边框 + 常规展示框边框，用于观察图片被切位置。</div>
           <div class="relationship-canvas">
             <div class="relationship-stage" style="width:${stageW}px;height:${stageH}px;">
               <div class="rel-image-source" data-rlabel="原图覆盖" style="${relRect(sourceCover.x, sourceCover.y, sourceCover.w, sourceCover.h)}"></div>
-              <div class="rel-image-box" data-rlabel="图片展示块" style="${relRect(layout.imageX, layout.imageY, layout.imageW, layout.imageH)}"></div>
-              <div class="rel-outline rel-safe-area" data-rlabel="safeArea" style="${relRect(0, 0, phone.width, phone.safeArea)}"></div>
-              <div class="rel-outline rel-top-bar" data-rlabel="顶部操作栏" style="${relRect(0, phone.safeArea, phone.width, strategy.closeBar)}"></div>
+              <div class="rel-outline rel-top-zone" data-rlabel="顶部边框" style="${relRect(0, 0, phone.width, layout.normalTop)}"></div>
               <div class="rel-outline rel-normal-window" data-rlabel="常规展示窗" style="${relRect(0, layout.normalTop, phone.width, layout.normalH)}"></div>
-              <div class="rel-outline rel-bottom-panel" data-rlabel="底部UI组件" style="${relRect(0, layout.panelTop, phone.width, bottomPanelH)}"></div>
-              <div class="rel-outline rel-safe-bottom" data-rlabel="底部安全区" style="${relRect(0, phone.height - phone.safeBottom, phone.width, phone.safeBottom)}"></div>
             </div>
           </div>
         </div>
