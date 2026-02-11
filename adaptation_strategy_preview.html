@@ -58,6 +58,10 @@
       gap: 6px;
     }
 
+    .control-wide {
+      grid-column: 1 / -1;
+    }
+
     .control label {
       font-size: 12px;
       color: var(--muted);
@@ -103,6 +107,29 @@
       font-size: 12px;
     }
 
+    .option-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .option-btn {
+      border: 1px solid #3a4254;
+      border-radius: 999px;
+      background: #11151e;
+      color: #d9e2f2;
+      padding: 7px 12px;
+      font-size: 12px;
+      line-height: 1.1;
+      cursor: pointer;
+    }
+
+    .option-btn.active {
+      border-color: #6fb8ff;
+      background: #26354f;
+      color: #f4f8ff;
+    }
+
     .legend {
       display: flex;
       flex-wrap: wrap;
@@ -127,7 +154,7 @@
 
     .cards {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(440px, 1fr));
       gap: 12px;
     }
 
@@ -148,11 +175,22 @@
     .device-shell {
       position: relative;
       margin: 0 auto;
-      border-radius: 18px;
+      border-radius: var(--shell-radius, 18px);
+      box-sizing: content-box;
       overflow: hidden;
-      border: 2px solid #3a3f4f;
+      isolation: isolate;
+      border: 2px solid #ffffff;
       background: #080a0f;
       box-shadow: 0 6px 16px rgba(0, 0, 0, 0.35);
+    }
+
+    .mockup-image {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      z-index: 0;
     }
 
     .layer {
@@ -161,53 +199,128 @@
       width: 100%;
     }
 
-    .safe-top {
-      background: rgba(255, 143, 143, 0.35);
+    .safe-area {
+      background: transparent;
+      z-index: 2;
+      transition: background-color 0.16s ease;
     }
 
     .close-bar {
-      background: rgba(255, 190, 116, 0.55);
-      border-bottom: 1px solid rgba(255, 255, 255, 0.14);
+      background: transparent;
+      z-index: 3;
+      transition: background-color 0.16s ease;
     }
 
     .normal-window {
-      border: 1px dashed rgba(255, 255, 255, 0.45);
       background: transparent;
-      pointer-events: none;
+      pointer-events: auto;
+      z-index: 2;
+      transition: background-color 0.16s ease;
     }
 
     .image-block {
       position: absolute;
-      background: linear-gradient(145deg, rgba(92, 200, 255, 0.85), rgba(130, 212, 139, 0.85));
-      border: 1px solid rgba(255, 255, 255, 0.45);
-      box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.15) inset;
+      background: transparent;
+      overflow: hidden;
+      z-index: 1;
+      transition: box-shadow 0.16s ease;
+    }
+
+    .image-block::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: transparent;
+      pointer-events: none;
+      z-index: 2;
+      transition: background 0.16s ease;
+    }
+
+    .image-content {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      z-index: 1;
+      transition: filter 0.16s ease;
+      pointer-events: none;
     }
 
     .bottom-panel {
-      background: rgba(231, 234, 241, 0.95);
-      border-top: 1px solid #c7cfdf;
+      background: transparent;
+      z-index: 4;
+      transition: background-color 0.16s ease;
     }
 
     .safe-bottom {
-      background: rgba(102, 114, 140, 0.35);
+      background: transparent;
+      z-index: 5;
+      transition: background-color 0.16s ease;
     }
 
-    .pill {
+    .safe-area:hover {
+      background: rgba(255, 143, 143, 0.48);
+    }
+
+    .close-bar:hover {
+      background: rgba(255, 190, 116, 0.52);
+    }
+
+    .normal-window:hover {
+      background: rgba(96, 179, 255, 0.38);
+    }
+
+    .image-block:hover {
+      box-shadow: inset 0 0 0 2px rgba(71, 211, 255, 0.62);
+    }
+
+    .image-block:hover::before {
+      background: linear-gradient(145deg, rgba(71, 211, 255, 0.34), rgba(146, 108, 255, 0.28));
+    }
+
+    .image-block:hover .image-content {
+      filter: saturate(1.16) brightness(1.08);
+    }
+
+    .bottom-panel:hover {
+      background: rgba(255, 170, 90, 0.4);
+    }
+
+    .safe-bottom:hover {
+      background: rgba(102, 114, 140, 0.5);
+    }
+
+    .layer[data-label],
+    .image-block[data-label] {
+      cursor: default;
+    }
+
+    .layer[data-label]::after,
+    .image-block[data-label]::after {
+      content: attr(data-label) " · 高度 " attr(data-height);
       position: absolute;
-      width: 18px;
-      height: 18px;
+      top: 8px;
+      left: 8px;
+      padding: 3px 7px;
       border-radius: 999px;
-      background: rgba(72, 50, 31, 0.45);
-      border: 1px solid rgba(255, 255, 255, 0.4);
-      top: 10px;
+      background: rgba(5, 8, 13, 0.8);
+      color: #f3f7ff;
+      font-size: 10px;
+      line-height: 1;
+      letter-spacing: 0.1px;
+      white-space: nowrap;
+      opacity: 0;
+      transform: translateY(-4px);
+      transition: opacity 0.15s ease, transform 0.15s ease;
+      pointer-events: none;
+      z-index: 8;
     }
 
-    .pill.left {
-      left: 10px;
-    }
-
-    .pill.right {
-      right: 10px;
+    .layer[data-label]:hover::after,
+    .image-block[data-label]:hover::after {
+      opacity: 1;
+      transform: translateY(0);
     }
 
     .meta {
@@ -228,56 +341,40 @@
 <body>
   <h1>界面 2 适配策略预览（Safe Area）</h1>
   <p class="hint">
-    规则：优先在「常规展示窗」居中；放不下则向上借 66pt 顶部区；仍放不下时改为缩宽保全图。图片尺寸可选并按 16 对齐。
+    规则：优先在「常规展示窗」居中；放不下则向上借 66pt 顶部区并进入 safeArea；仍放不下时改为缩宽保全图。图片尺寸可选并按 16 对齐，默认仅显示 mockup 和图片展示块，悬停可查看组件名和对应高度。
   </p>
 
   <section class="controls">
-    <div class="control">
-      <label for="preset">图片尺寸预设</label>
-      <select id="preset"></select>
+    <div class="control control-wide">
+      <label>图片尺寸（16 对齐）</label>
+      <div class="option-group" id="sizeOptions"></div>
+    </div>
+    <div class="control control-wide">
+      <label>适配策略</label>
+      <div class="option-group" id="strategyOptions"></div>
     </div>
     <div class="control">
-      <label for="imgW">图片宽度（px）</label>
-      <input id="imgW" type="number" min="16" step="16" />
-    </div>
-    <div class="control">
-      <label for="imgH">图片高度（px）</label>
-      <input id="imgH" type="number" min="16" step="16" />
-    </div>
-    <div class="control">
-      <label for="closeBar">关闭按钮区高度（pt）</label>
-      <input id="closeBar" type="number" min="44" max="120" step="1" value="66" />
-    </div>
-    <div class="control">
-      <label>&nbsp;</label>
-      <button id="alignBtn">手动对齐到 16 倍数</button>
-    </div>
-    <div class="control">
-      <label>&nbsp;</label>
-      <div class="inline">
-        <input id="autoAlign" type="checkbox" checked />
-        <span>修改时自动 16 对齐</span>
-      </div>
+      <label>当前图片比例</label>
       <div class="ratio-text" id="ratioText"></div>
     </div>
   </section>
 
   <div class="legend">
-    <span class="tag"><span class="dot" style="background: rgba(255,143,143,0.55)"></span>safeTop</span>
-    <span class="tag"><span class="dot" style="background: rgba(255,190,116,0.72)"></span>66pt 关闭栏</span>
+    <span class="tag"><span class="dot" style="background: rgba(255,143,143,0.55)"></span>safeArea</span>
+    <span class="tag"><span class="dot" style="background: rgba(255,190,116,0.72)"></span>66pt 顶部操作栏</span>
     <span class="tag"><span class="dot" style="background: rgba(92,200,255,0.75)"></span>图片展示块</span>
-    <span class="tag"><span class="dot" style="border:1px dashed rgba(255,255,255,0.75); width: 11px; height: 11px;"></span>常规展示窗（不借顶部）</span>
+    <span class="tag"><span class="dot" style="background: rgba(255,255,255,0.32)"></span>常规展示窗（不借顶部）</span>
     <span class="tag"><span class="dot" style="background: rgba(231,234,241,0.95)"></span>下方控制面板</span>
   </div>
 
   <section class="cards" id="cards"></section>
 
   <script>
-    const GAP = 8;
-    const CARD_VIEW_WIDTH = 190;
+    const CARD_VIEW_WIDTH = 380;
+    const PREVIEW_IMAGE_FILE = "home.png";
 
     const presets = [
-      { id: "3_4", label: "3:4（880×1184）", w: 880, h: 1184 },
+      { id: "3_4", label: "3:4（864×1184）", w: 864, h: 1184 },
       { id: "1_1", label: "1:1（1024×1024）", w: 1024, h: 1024 },
       { id: "4_3", label: "4:3（1184×880）", w: 1184, h: 880 },
       { id: "9_16", label: "9:16（864×1536）", w: 864, h: 1536 },
@@ -285,27 +382,37 @@
       { id: "2_3", label: "2:3（1024×1536）", w: 1024, h: 1536 }
     ];
 
-    const phones = [
-      { name: "iPhone 6 / 6s / 7 / 8", width: 375, height: 667, safeTop: 20, safeBottom: 0, baseAreaH: 369 },
-      { name: "iPhone 6 Plus / 6s Plus", width: 414, height: 736, safeTop: 20, safeBottom: 0, baseAreaH: 438 },
-      { name: "iPhone X / XS / 11 Pro", width: 375, height: 812, safeTop: 44, safeBottom: 34, baseAreaH: 456 },
-      { name: "iPhone 12 mini / 13 mini", width: 375, height: 812, safeTop: 50, safeBottom: 34, baseAreaH: 450 },
-      { name: "iPhone 12 / 12 Pro / 13 / 14", width: 390, height: 844, safeTop: 47, safeBottom: 34, baseAreaH: 470 },
-      { name: "iPhone 14 Pro / 15 / 15 Pro / 16", width: 393, height: 852, safeTop: 59, safeBottom: 34, baseAreaH: 466 },
-      { name: "iPhone 17 / 17 Pro", width: 402, height: 874, safeTop: 62, safeBottom: 34, baseAreaH: 485 },
-      { name: "iPhone 11 Pro Max", width: 414, height: 896, safeTop: 44, safeBottom: 34, baseAreaH: 525 },
-      { name: "iPhone 13 Pro Max", width: 428, height: 926, safeTop: 47, safeBottom: 34, baseAreaH: 510 },
-      { name: "iPhone 16 Plus", width: 430, height: 932, safeTop: 59, safeBottom: 34, baseAreaH: 504 },
-      { name: "iPhone 16 / 17 Pro Max", width: 440, height: 956, safeTop: 62, safeBottom: 34, baseAreaH: 525 }
+    const strategies = [
+      {
+        id: "scheme_1",
+        label: "适配方案1",
+        closeBar: 66,
+        gap: 0
+      }
     ];
 
+    const phones = [
+      { name: "iPhone 6 / 6s / 7 / 8", width: 375, height: 667, safeArea: 20, safeBottom: 0, targetAreaH: 369, bottomPanelH: 278, mockup: "iPhone 6-6s-7-8、SE.png", modern: false },
+      { name: "iPhone 6 Plus / 6s Plus", width: 414, height: 736, safeArea: 20, safeBottom: 0, targetAreaH: 438, bottomPanelH: 278, mockup: "iPhone 6 Plus-6s Plus-7 Plus-8 Plus.png", modern: false },
+      { name: "iPhone X / XS / 11 Pro", width: 375, height: 812, safeArea: 44, safeBottom: 34, targetAreaH: 456, bottomPanelH: 312, mockup: "iPhone X - XS - 11 Pro.png", modern: true },
+      { name: "iPhone 12 mini / 13 mini", width: 375, height: 812, safeArea: 50, safeBottom: 34, targetAreaH: 450, bottomPanelH: 312, mockup: "iPhone 12 mini-13 mini.png", modern: true },
+      { name: "iPhone 12 / 12 Pro / 13 / 14", width: 390, height: 844, safeArea: 47, safeBottom: 34, targetAreaH: 470, bottomPanelH: 327, mockup: "iPhone 12-12 Pro-13-13 Pro-14.png", modern: true },
+      { name: "iPhone 14 Pro / 15 / 15 Pro / 16", width: 393, height: 852, safeArea: 59, safeBottom: 34, targetAreaH: 466, bottomPanelH: 327, mockup: "iPhone 14 Pro-15-15 Pro-17.png", modern: true },
+      { name: "iPhone 17 / 17 Pro", width: 402, height: 874, safeArea: 62, safeBottom: 34, targetAreaH: 485, bottomPanelH: 327, mockup: "iPhone 17.png", modern: true },
+      { name: "iPhone 11 Pro Max", width: 414, height: 896, safeArea: 44, safeBottom: 34, targetAreaH: 525, bottomPanelH: 327, mockup: "iPhone 11 Pro Max.png", modern: true },
+      { name: "iPhone 13 Pro Max", width: 428, height: 926, safeArea: 47, safeBottom: 34, targetAreaH: 510, bottomPanelH: 369, mockup: "iPhone 13 Pro Max.png", modern: true },
+      { name: "iPhone 16 Plus", width: 430, height: 932, safeArea: 59, safeBottom: 34, targetAreaH: 504, bottomPanelH: 369, mockup: "iPhone 16 Plus.png", modern: true },
+      { name: "iPhone 16 / 17 Pro Max", width: 440, height: 956, safeArea: 62, safeBottom: 34, targetAreaH: 525, bottomPanelH: 369, mockup: "iPhone 16-17 Pro Max.png", modern: true }
+    ];
+
+    const state = {
+      presetId: "3_4",
+      strategyId: "scheme_1"
+    };
+
     const el = {
-      preset: document.getElementById("preset"),
-      imgW: document.getElementById("imgW"),
-      imgH: document.getElementById("imgH"),
-      closeBar: document.getElementById("closeBar"),
-      alignBtn: document.getElementById("alignBtn"),
-      autoAlign: document.getElementById("autoAlign"),
+      sizeOptions: document.getElementById("sizeOptions"),
+      strategyOptions: document.getElementById("strategyOptions"),
       ratioText: document.getElementById("ratioText"),
       cards: document.getElementById("cards")
     };
@@ -315,28 +422,42 @@
       return Math.round(v / 16) * 16;
     }
 
-    function modeText(mode) {
+    function modeText(mode, closeBar) {
       if (mode === "normal") return "常规居中（不借顶部）";
-      if (mode === "expanded") return "借顶部 66pt 居中";
+      if (mode === "expanded") return `借顶部 ${closeBar}pt 居中`;
       return "兜底缩宽（保全图）";
     }
 
-    function alignInputs(force) {
-      const auto = el.autoAlign.checked;
-      if (!force && !auto) return;
-      const w = snap16(Number(el.imgW.value));
-      const h = snap16(Number(el.imgH.value));
-      el.imgW.value = String(w);
-      el.imgH.value = String(h);
+    function mockupSrc(fileName) {
+      if (!fileName) return "";
+      return `images/${encodeURIComponent(fileName)}`;
     }
 
-    function computeLayout(phone, imgW, imgH, closeBar) {
+    function previewSrc() {
+      return `images/${encodeURIComponent(PREVIEW_IMAGE_FILE)}`;
+    }
+
+    function buildOptionButtons(container, items, selectedId, onSelect) {
+      container.innerHTML = "";
+      items.forEach((item) => {
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "option-btn";
+        if (item.id === selectedId) btn.classList.add("active");
+        btn.textContent = item.label;
+        btn.addEventListener("click", () => onSelect(item.id));
+        container.appendChild(btn);
+      });
+    }
+
+    function computeLayout(phone, imgW, imgH, strategy) {
       const ratioHW = imgH / imgW;
       const ratioWH = imgW / imgH;
-      const normalTop = phone.safeTop + closeBar + GAP;
-      const normalH = phone.baseAreaH;
-      const panelTop = Math.min(phone.height - phone.safeBottom, normalTop + normalH);
-      const expandedH = panelTop - phone.safeTop;
+      const normalTop = phone.safeArea + strategy.closeBar + strategy.gap;
+      const panelTop = phone.height - phone.bottomPanelH;
+      const normalH = Math.max(0, panelTop - normalTop);
+      const expandedTop = 0;
+      const expandedH = panelTop - expandedTop;
       const fitH = phone.width * ratioHW;
 
       let imageW = phone.width;
@@ -349,13 +470,13 @@
         mode = "normal";
       } else if (fitH <= expandedH) {
         mode = "expanded";
-        imageY = phone.safeTop + (expandedH - fitH) / 2;
+        imageY = expandedTop + (expandedH - fitH) / 2;
       } else {
         mode = "shrink";
         imageH = expandedH;
         imageW = expandedH * ratioWH;
         imageX = (phone.width - imageW) / 2;
-        imageY = phone.safeTop;
+        imageY = expandedTop;
       }
 
       return {
@@ -363,7 +484,8 @@
         normalTop,
         normalH,
         panelTop,
-        expandedH,
+        targetAreaH: phone.targetAreaH,
+        bottomPanelH: phone.bottomPanelH,
         imageW,
         imageH,
         imageX,
@@ -371,35 +493,41 @@
       };
     }
 
-    function buildCard(phone, layout, closeBar, imgW, imgH) {
+    function buildCard(phone, layout, strategy, imgW, imgH) {
       const scale = CARD_VIEW_WIDTH / phone.width;
       const shellW = phone.width * scale;
       const shellH = phone.height * scale;
+      const shellRadius = phone.modern ? 60 : 18;
 
-      const styleRect = (x, y, w, h) => {
-        return `left:${x * scale}px;top:${y * scale}px;width:${w * scale}px;height:${h * scale}px;`;
-      };
-
-      const bottomPanelH = phone.height - phone.safeBottom - layout.panelTop;
+      const styleRect = (x, y, w, h) => `left:${x * scale}px;top:${y * scale}px;width:${w * scale}px;height:${h * scale}px;`;
+      const bottomPanelH = layout.bottomPanelH;
+      const safeAreaH = Math.round(phone.safeArea);
+      const topBarH = Math.round(strategy.closeBar);
+      const normalWindowH = Math.round(layout.normalH);
+      const imageAreaH = Math.round(layout.imageH);
+      const uiPanelH = Math.round(bottomPanelH);
+      const safeBottomH = Math.round(phone.safeBottom);
 
       const card = document.createElement("article");
       card.className = "card";
       card.innerHTML = `
         <h3>${phone.name}</h3>
-        <div class="device-shell" style="width:${shellW}px;height:${shellH}px;">
-          <div class="layer safe-top" style="top:0;height:${phone.safeTop * scale}px;"></div>
-          <div class="layer close-bar" style="top:${phone.safeTop * scale}px;height:${closeBar * scale}px;">
-            <span class="pill left"></span>
-            <span class="pill right"></span>
+        <div class="device-shell" style="width:${shellW}px;height:${shellH}px;--shell-radius:${shellRadius}px;">
+          <img class="mockup-image" src="${mockupSrc(phone.mockup)}" alt="${phone.name} mockup" onerror="this.style.display='none'">
+          <div class="layer safe-area" data-label="状态栏 / safeArea" data-height="${safeAreaH}pt" style="top:0;height:${phone.safeArea * scale}px;"></div>
+          <div class="layer close-bar" data-label="顶部操作栏" data-height="${topBarH}pt" style="top:${phone.safeArea * scale}px;height:${strategy.closeBar * scale}px;"></div>
+          <div class="layer normal-window" data-label="常规展示窗（不借顶部）" data-height="${normalWindowH}pt" style="top:${layout.normalTop * scale}px;height:${layout.normalH * scale}px;"></div>
+          <div class="image-block" data-label="图片展示区（适配后）" data-height="${imageAreaH}pt" style="${styleRect(layout.imageX, layout.imageY, layout.imageW, layout.imageH)}">
+            <img class="image-content" src="${previewSrc()}" alt="展示图" onerror="this.style.display='none'">
           </div>
-          <div class="layer normal-window" style="top:${layout.normalTop * scale}px;height:${layout.normalH * scale}px;"></div>
-          <div class="image-block" style="${styleRect(layout.imageX, layout.imageY, layout.imageW, layout.imageH)}"></div>
-          <div class="layer bottom-panel" style="top:${layout.panelTop * scale}px;height:${bottomPanelH * scale}px;"></div>
-          <div class="layer safe-bottom" style="top:${(phone.height - phone.safeBottom) * scale}px;height:${phone.safeBottom * scale}px;"></div>
+          <div class="layer bottom-panel" data-label="底部UI组件" data-height="${uiPanelH}pt" style="top:${layout.panelTop * scale}px;height:${bottomPanelH * scale}px;"></div>
+          <div class="layer safe-bottom" data-label="底部安全区" data-height="${safeBottomH}pt" style="top:${(phone.height - phone.safeBottom) * scale}px;height:${phone.safeBottom * scale}px;"></div>
         </div>
-        <div class="meta">屏幕 ${phone.width}×${phone.height} · safeTop ${phone.safeTop} · safeBottom ${phone.safeBottom}</div>
+        <div class="meta">屏幕 ${phone.width}×${phone.height} · safeArea ${phone.safeArea} · safeBottom ${phone.safeBottom}</div>
+        <div class="meta">mockup：${phone.mockup || "未匹配"}</div>
+        <div class="meta">底部组件 ${layout.bottomPanelH}（含 safeBottom ${phone.safeBottom}）· 目标适配高 ${layout.targetAreaH}</div>
         <div class="meta">图片展示 ${Math.round(layout.imageW)}×${Math.round(layout.imageH)}（源图 ${imgW}×${imgH}）</div>
-        <div class="mode">${modeText(layout.mode)}</div>
+        <div class="mode">${modeText(layout.mode, strategy.closeBar)}</div>
       `;
 
       return card;
@@ -410,56 +538,45 @@
       const d = gcd(w, h);
       const rw = w / d;
       const rh = h / d;
-      el.ratioText.textContent = `当前：${w}×${h}（约 ${rw}:${rh}）`;
+      el.ratioText.textContent = `${w}×${h}（约 ${rw}:${rh}）`;
+    }
+
+    function getActivePreset() {
+      return presets.find((p) => p.id === state.presetId) || presets[0];
+    }
+
+    function getActiveStrategy() {
+      return strategies.find((s) => s.id === state.strategyId) || strategies[0];
+    }
+
+    function renderOptions() {
+      buildOptionButtons(el.sizeOptions, presets, state.presetId, (id) => {
+        state.presetId = id;
+        render();
+      });
+      buildOptionButtons(el.strategyOptions, strategies, state.strategyId, (id) => {
+        state.strategyId = id;
+        render();
+      });
     }
 
     function render() {
-      alignInputs(false);
+      const preset = getActivePreset();
+      const strategy = getActiveStrategy();
+      const imgW = snap16(preset.w);
+      const imgH = snap16(preset.h);
 
-      const imgW = snap16(Number(el.imgW.value));
-      const imgH = snap16(Number(el.imgH.value));
-      const closeBar = Math.max(44, Number(el.closeBar.value) || 66);
-      el.closeBar.value = String(closeBar);
-
+      renderOptions();
       updateRatioText(imgW, imgH);
 
       el.cards.innerHTML = "";
       phones.forEach((phone) => {
-        const layout = computeLayout(phone, imgW, imgH, closeBar);
-        el.cards.appendChild(buildCard(phone, layout, closeBar, imgW, imgH));
+        const layout = computeLayout(phone, imgW, imgH, strategy);
+        el.cards.appendChild(buildCard(phone, layout, strategy, imgW, imgH));
       });
     }
 
     function init() {
-      presets.forEach((p) => {
-        const opt = document.createElement("option");
-        opt.value = p.id;
-        opt.textContent = p.label;
-        el.preset.appendChild(opt);
-      });
-
-      el.preset.value = "3_4";
-      const start = presets.find((p) => p.id === el.preset.value);
-      el.imgW.value = String(start.w);
-      el.imgH.value = String(start.h);
-
-      el.preset.addEventListener("change", () => {
-        const item = presets.find((p) => p.id === el.preset.value);
-        if (!item) return;
-        el.imgW.value = String(item.w);
-        el.imgH.value = String(item.h);
-        render();
-      });
-
-      el.imgW.addEventListener("input", render);
-      el.imgH.addEventListener("input", render);
-      el.closeBar.addEventListener("input", render);
-      el.autoAlign.addEventListener("change", render);
-      el.alignBtn.addEventListener("click", () => {
-        alignInputs(true);
-        render();
-      });
-
       render();
     }
 
