@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Safe Area 适配策略预览</title>
+  <style>
+    :root {
+      --bg: #14161b;
+      --panel: #1e222b;
+      --panel-border: #303746;
+      --text: #e8edf7;
+      --muted: #9ea8ba;
+      --accent: #5cc8ff;
+      --ok: #82d48b;
+      --warn: #ffbe74;
+      --danger: #ff8f8f;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      padding: 24px;
+      font-family: "SF Pro Text", "PingFang SC", "Microsoft YaHei", sans-serif;
+      background: radial-gradient(circle at 10% 5%, #202736, var(--bg) 48%);
+      color: var(--text);
+    }
+
+    h1 {
+      margin: 0 0 8px;
+      font-size: 20px;
+      font-weight: 700;
+    }
+
+    .hint {
+      margin: 0 0 14px;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .controls {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 10px;
+      padding: 14px;
+      border: 1px solid var(--panel-border);
+      border-radius: 12px;
+      background: rgba(30, 34, 43, 0.85);
+      margin-bottom: 14px;
+    }
+
+    .control {
+      display: grid;
+      gap: 6px;
+    }
+
+    .control label {
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    select,
+    input,
+    button {
+      border: 1px solid #3a4254;
+      border-radius: 8px;
+      background: #11151e;
+      color: var(--text);
+      padding: 8px 10px;
+      font-size: 13px;
+      outline: none;
+    }
+
+    input[type="checkbox"] {
+      accent-color: var(--accent);
+      transform: translateY(1px);
+    }
+
+    .inline {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    button {
+      cursor: pointer;
+      background: #1f293d;
+    }
+
+    button:hover {
+      border-color: #5d6781;
+    }
+
+    .ratio-text {
+      margin-top: 2px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px 12px;
+      margin-bottom: 12px;
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 2px;
+      display: inline-block;
+    }
+
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 12px;
+    }
+
+    .card {
+      border: 1px solid var(--panel-border);
+      border-radius: 12px;
+      padding: 10px;
+      background: rgba(21, 26, 35, 0.9);
+    }
+
+    .card h3 {
+      margin: 0 0 8px;
+      font-size: 13px;
+      font-weight: 600;
+      color: #d8deec;
+    }
+
+    .device-shell {
+      position: relative;
+      margin: 0 auto;
+      border-radius: 18px;
+      overflow: hidden;
+      border: 2px solid #3a3f4f;
+      background: #080a0f;
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.35);
+    }
+
+    .layer {
+      position: absolute;
+      left: 0;
+      width: 100%;
+    }
+
+    .safe-top {
+      background: rgba(255, 143, 143, 0.35);
+    }
+
+    .close-bar {
+      background: rgba(255, 190, 116, 0.55);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.14);
+    }
+
+    .normal-window {
+      border: 1px dashed rgba(255, 255, 255, 0.45);
+      background: transparent;
+      pointer-events: none;
+    }
+
+    .image-block {
+      position: absolute;
+      background: linear-gradient(145deg, rgba(92, 200, 255, 0.85), rgba(130, 212, 139, 0.85));
+      border: 1px solid rgba(255, 255, 255, 0.45);
+      box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.15) inset;
+    }
+
+    .bottom-panel {
+      background: rgba(231, 234, 241, 0.95);
+      border-top: 1px solid #c7cfdf;
+    }
+
+    .safe-bottom {
+      background: rgba(102, 114, 140, 0.35);
+    }
+
+    .pill {
+      position: absolute;
+      width: 18px;
+      height: 18px;
+      border-radius: 999px;
+      background: rgba(72, 50, 31, 0.45);
+      border: 1px solid rgba(255, 255, 255, 0.4);
+      top: 10px;
+    }
+
+    .pill.left {
+      left: 10px;
+    }
+
+    .pill.right {
+      right: 10px;
+    }
+
+    .meta {
+      margin-top: 8px;
+      font-size: 12px;
+      color: var(--muted);
+      line-height: 1.35;
+    }
+
+    .mode {
+      margin-top: 4px;
+      font-size: 12px;
+      font-weight: 600;
+      color: #dbe9ff;
+    }
+  </style>
+</head>
+<body>
+  <h1>界面 2 适配策略预览（Safe Area）</h1>
+  <p class="hint">
+    规则：优先在「常规展示窗」居中；放不下则向上借 66pt 顶部区；仍放不下时改为缩宽保全图。图片尺寸可选并按 16 对齐。
+  </p>
+
+  <section class="controls">
+    <div class="control">
+      <label for="preset">图片尺寸预设</label>
+      <select id="preset"></select>
+    </div>
+    <div class="control">
+      <label for="imgW">图片宽度（px）</label>
+      <input id="imgW" type="number" min="16" step="16" />
+    </div>
+    <div class="control">
+      <label for="imgH">图片高度（px）</label>
+      <input id="imgH" type="number" min="16" step="16" />
+    </div>
+    <div class="control">
+      <label for="closeBar">关闭按钮区高度（pt）</label>
+      <input id="closeBar" type="number" min="44" max="120" step="1" value="66" />
+    </div>
+    <div class="control">
+      <label>&nbsp;</label>
+      <button id="alignBtn">手动对齐到 16 倍数</button>
+    </div>
+    <div class="control">
+      <label>&nbsp;</label>
+      <div class="inline">
+        <input id="autoAlign" type="checkbox" checked />
+        <span>修改时自动 16 对齐</span>
+      </div>
+      <div class="ratio-text" id="ratioText"></div>
+    </div>
+  </section>
+
+  <div class="legend">
+    <span class="tag"><span class="dot" style="background: rgba(255,143,143,0.55)"></span>safeTop</span>
+    <span class="tag"><span class="dot" style="background: rgba(255,190,116,0.72)"></span>66pt 关闭栏</span>
+    <span class="tag"><span class="dot" style="background: rgba(92,200,255,0.75)"></span>图片展示块</span>
+    <span class="tag"><span class="dot" style="border:1px dashed rgba(255,255,255,0.75); width: 11px; height: 11px;"></span>常规展示窗（不借顶部）</span>
+    <span class="tag"><span class="dot" style="background: rgba(231,234,241,0.95)"></span>下方控制面板</span>
+  </div>
+
+  <section class="cards" id="cards"></section>
+
+  <script>
+    const GAP = 8;
+    const CARD_VIEW_WIDTH = 190;
+
+    const presets = [
+      { id: "3_4", label: "3:4（880×1184）", w: 880, h: 1184 },
+      { id: "1_1", label: "1:1（1024×1024）", w: 1024, h: 1024 },
+      { id: "4_3", label: "4:3（1184×880）", w: 1184, h: 880 },
+      { id: "9_16", label: "9:16（864×1536）", w: 864, h: 1536 },
+      { id: "16_9", label: "16:9（1536×864）", w: 1536, h: 864 },
+      { id: "2_3", label: "2:3（1024×1536）", w: 1024, h: 1536 }
+    ];
+
+    const phones = [
+      { name: "iPhone 6 / 6s / 7 / 8", width: 375, height: 667, safeTop: 20, safeBottom: 0, baseAreaH: 369 },
+      { name: "iPhone 6 Plus / 6s Plus", width: 414, height: 736, safeTop: 20, safeBottom: 0, baseAreaH: 438 },
+      { name: "iPhone X / XS / 11 Pro", width: 375, height: 812, safeTop: 44, safeBottom: 34, baseAreaH: 456 },
+      { name: "iPhone 12 mini / 13 mini", width: 375, height: 812, safeTop: 50, safeBottom: 34, baseAreaH: 450 },
+      { name: "iPhone 12 / 12 Pro / 13 / 14", width: 390, height: 844, safeTop: 47, safeBottom: 34, baseAreaH: 470 },
+      { name: "iPhone 14 Pro / 15 / 15 Pro / 16", width: 393, height: 852, safeTop: 59, safeBottom: 34, baseAreaH: 466 },
+      { name: "iPhone 17 / 17 Pro", width: 402, height: 874, safeTop: 62, safeBottom: 34, baseAreaH: 485 },
+      { name: "iPhone 11 Pro Max", width: 414, height: 896, safeTop: 44, safeBottom: 34, baseAreaH: 525 },
+      { name: "iPhone 13 Pro Max", width: 428, height: 926, safeTop: 47, safeBottom: 34, baseAreaH: 510 },
+      { name: "iPhone 16 Plus", width: 430, height: 932, safeTop: 59, safeBottom: 34, baseAreaH: 504 },
+      { name: "iPhone 16 / 17 Pro Max", width: 440, height: 956, safeTop: 62, safeBottom: 34, baseAreaH: 525 }
+    ];
+
+    const el = {
+      preset: document.getElementById("preset"),
+      imgW: document.getElementById("imgW"),
+      imgH: document.getElementById("imgH"),
+      closeBar: document.getElementById("closeBar"),
+      alignBtn: document.getElementById("alignBtn"),
+      autoAlign: document.getElementById("autoAlign"),
+      ratioText: document.getElementById("ratioText"),
+      cards: document.getElementById("cards")
+    };
+
+    function snap16(v) {
+      if (!Number.isFinite(v) || v < 16) return 16;
+      return Math.round(v / 16) * 16;
+    }
+
+    function modeText(mode) {
+      if (mode === "normal") return "常规居中（不借顶部）";
+      if (mode === "expanded") return "借顶部 66pt 居中";
+      return "兜底缩宽（保全图）";
+    }
+
+    function alignInputs(force) {
+      const auto = el.autoAlign.checked;
+      if (!force && !auto) return;
+      const w = snap16(Number(el.imgW.value));
+      const h = snap16(Number(el.imgH.value));
+      el.imgW.value = String(w);
+      el.imgH.value = String(h);
+    }
+
+    function computeLayout(phone, imgW, imgH, closeBar) {
+      const ratioHW = imgH / imgW;
+      const ratioWH = imgW / imgH;
+      const normalTop = phone.safeTop + closeBar + GAP;
+      const normalH = phone.baseAreaH;
+      const panelTop = Math.min(phone.height - phone.safeBottom, normalTop + normalH);
+      const expandedH = panelTop - phone.safeTop;
+      const fitH = phone.width * ratioHW;
+
+      let imageW = phone.width;
+      let imageH = fitH;
+      let imageX = 0;
+      let imageY = normalTop + (normalH - fitH) / 2;
+      let mode = "normal";
+
+      if (fitH <= normalH) {
+        mode = "normal";
+      } else if (fitH <= expandedH) {
+        mode = "expanded";
+        imageY = phone.safeTop + (expandedH - fitH) / 2;
+      } else {
+        mode = "shrink";
+        imageH = expandedH;
+        imageW = expandedH * ratioWH;
+        imageX = (phone.width - imageW) / 2;
+        imageY = phone.safeTop;
+      }
+
+      return {
+        mode,
+        normalTop,
+        normalH,
+        panelTop,
+        expandedH,
+        imageW,
+        imageH,
+        imageX,
+        imageY
+      };
+    }
+
+    function buildCard(phone, layout, closeBar, imgW, imgH) {
+      const scale = CARD_VIEW_WIDTH / phone.width;
+      const shellW = phone.width * scale;
+      const shellH = phone.height * scale;
+
+      const styleRect = (x, y, w, h) => {
+        return `left:${x * scale}px;top:${y * scale}px;width:${w * scale}px;height:${h * scale}px;`;
+      };
+
+      const bottomPanelH = phone.height - phone.safeBottom - layout.panelTop;
+
+      const card = document.createElement("article");
+      card.className = "card";
+      card.innerHTML = `
+        <h3>${phone.name}</h3>
+        <div class="device-shell" style="width:${shellW}px;height:${shellH}px;">
+          <div class="layer safe-top" style="top:0;height:${phone.safeTop * scale}px;"></div>
+          <div class="layer close-bar" style="top:${phone.safeTop * scale}px;height:${closeBar * scale}px;">
+            <span class="pill left"></span>
+            <span class="pill right"></span>
+          </div>
+          <div class="layer normal-window" style="top:${layout.normalTop * scale}px;height:${layout.normalH * scale}px;"></div>
+          <div class="image-block" style="${styleRect(layout.imageX, layout.imageY, layout.imageW, layout.imageH)}"></div>
+          <div class="layer bottom-panel" style="top:${layout.panelTop * scale}px;height:${bottomPanelH * scale}px;"></div>
+          <div class="layer safe-bottom" style="top:${(phone.height - phone.safeBottom) * scale}px;height:${phone.safeBottom * scale}px;"></div>
+        </div>
+        <div class="meta">屏幕 ${phone.width}×${phone.height} · safeTop ${phone.safeTop} · safeBottom ${phone.safeBottom}</div>
+        <div class="meta">图片展示 ${Math.round(layout.imageW)}×${Math.round(layout.imageH)}（源图 ${imgW}×${imgH}）</div>
+        <div class="mode">${modeText(layout.mode)}</div>
+      `;
+
+      return card;
+    }
+
+    function updateRatioText(w, h) {
+      const gcd = (a, b) => (b ? gcd(b, a % b) : a);
+      const d = gcd(w, h);
+      const rw = w / d;
+      const rh = h / d;
+      el.ratioText.textContent = `当前：${w}×${h}（约 ${rw}:${rh}）`;
+    }
+
+    function render() {
+      alignInputs(false);
+
+      const imgW = snap16(Number(el.imgW.value));
+      const imgH = snap16(Number(el.imgH.value));
+      const closeBar = Math.max(44, Number(el.closeBar.value) || 66);
+      el.closeBar.value = String(closeBar);
+
+      updateRatioText(imgW, imgH);
+
+      el.cards.innerHTML = "";
+      phones.forEach((phone) => {
+        const layout = computeLayout(phone, imgW, imgH, closeBar);
+        el.cards.appendChild(buildCard(phone, layout, closeBar, imgW, imgH));
+      });
+    }
+
+    function init() {
+      presets.forEach((p) => {
+        const opt = document.createElement("option");
+        opt.value = p.id;
+        opt.textContent = p.label;
+        el.preset.appendChild(opt);
+      });
+
+      el.preset.value = "3_4";
+      const start = presets.find((p) => p.id === el.preset.value);
+      el.imgW.value = String(start.w);
+      el.imgH.value = String(start.h);
+
+      el.preset.addEventListener("change", () => {
+        const item = presets.find((p) => p.id === el.preset.value);
+        if (!item) return;
+        el.imgW.value = String(item.w);
+        el.imgH.value = String(item.h);
+        render();
+      });
+
+      el.imgW.addEventListener("input", render);
+      el.imgH.addEventListener("input", render);
+      el.closeBar.addEventListener("input", render);
+      el.autoAlign.addEventListener("change", render);
+      el.alignBtn.addEventListener("click", () => {
+        alignInputs(true);
+        render();
+      });
+
+      render();
+    }
+
+    init();
+  </script>
+</body>
+</html>
