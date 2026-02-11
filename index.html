@@ -114,8 +114,38 @@
       line-height: 1.4;
     }
 
-    .strategy-note div + div {
+    .strategy-note .line + .line {
       margin-top: 2px;
+    }
+
+    .strategy-note .note-title {
+      color: #e4ebfa;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    .strategy-note .algo-block {
+      margin-top: 8px;
+      padding: 6px 8px;
+      border: 1px solid rgba(88, 102, 128, 0.6);
+      border-radius: 8px;
+      background: rgba(8, 12, 20, 0.55);
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      font-size: 11px;
+      line-height: 1.45;
+      color: #c9d6ee;
+    }
+
+    .strategy-note .usage-block {
+      margin-top: 8px;
+      opacity: 0.56;
+      font-size: 10.5px;
+      color: #aab7cf;
+    }
+
+    .strategy-note .usage-block .note-title {
+      color: #bcc8de;
+      font-weight: 500;
     }
 
     .option-group {
@@ -528,15 +558,40 @@
 
     function renderStrategyNote(strategy) {
       const inset = strategy.normalHeadInset || 0;
-      const lines = presets.map((preset) => strategyLineForPreset(preset, strategy));
-      const introLines = [
-        "<div><strong>完整策略（适配方案1）</strong></div>",
-        `<div>1) 先定展示边界：normalTop = safeArea + 顶部操作栏(66) + gap(0)，panelTop = 屏高 - 底部UI，normalH = panelTop - normalTop；常规居中按顶部偏移 ${inset}pt 修正，normalContentTop = normalTop - ${inset}，normalContentH = normalH + ${inset}。</div>`,
-        "<div>2) 3:4特例：输入 864×1184 时，图片展示块直接铺满 [x=0, y=0, w=屏宽, h=panelTop]。</div>",
-        "<div>3) 非3:4时按三步判断：先看图片按屏幕同宽后能不能放进常规展示区（含13pt顶部预留），能放就常规居中；放不下再尝试上借顶部空间；还放不下就缩窄宽度，保证整图都能看到。</div>",
-        "<div><strong>各尺寸在该策略下</strong></div>"
+      const usageLines = presets.map((preset) => strategyLineForPreset(preset, strategy));
+      const textLines = [
+        "先把可展示区域分成两层：常规展示框（顶部操作栏下方）和可借用的扩展展示框（从屏幕顶到底部UI上沿）。",
+        `常规居中时，为了避免视觉上压住关闭按钮，把常规展示框的顶边再上移 ${inset}pt 后再做上下居中。`,
+        "3:4（864×1184）固定走满屏展示分支，优先保证这类图在展示区域内尽量铺满。",
+        "其他比例走通用分支：先尝试常规居中，不够再借顶部，仍不够就缩宽以保证整张图可见。"
       ];
-      el.strategyNote.innerHTML = introLines.concat(lines.map((line) => `<div>${line}</div>`)).join("");
+      const algoLines = [
+        "panelTop = phoneH - bottomPanelH",
+        "normalTop = safeArea + 66",
+        `normalContentTop = normalTop - ${inset}`,
+        "normalContentH = panelTop - normalContentTop",
+        "expandedH = panelTop",
+        "fitH = phoneW * imgH / imgW",
+        "if (imgW==864 && imgH==1184) => fill",
+        "else if (fitH <= normalContentH) => normal-center",
+        "else if (fitH <= expandedH) => expanded-center",
+        "else => shrink-width (full image visible)"
+      ];
+
+      el.strategyNote.innerHTML = `
+        <div class="note-block">
+          <div class="note-title">完整策略（适配方案1）</div>
+          ${textLines.map((line) => `<div class="line">${line}</div>`).join("")}
+        </div>
+        <div class="algo-block">
+          <div class="note-title">算法说明</div>
+          ${algoLines.map((line) => `<div class="line">${line}</div>`).join("")}
+        </div>
+        <div class="usage-block">
+          <div class="note-title">各尺寸应用情况（参考）</div>
+          ${usageLines.map((line) => `<div class="line">${line}</div>`).join("")}
+        </div>
+      `;
     }
 
     function mockupSrc(fileName) {
