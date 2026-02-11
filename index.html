@@ -533,7 +533,7 @@
         "<div><strong>完整策略（适配方案1）</strong></div>",
         `<div>1) 先定展示边界：normalTop = safeArea + 顶部操作栏(66) + gap(0)，panelTop = 屏高 - 底部UI，normalH = panelTop - normalTop；常规居中按顶部偏移 ${inset}pt 修正，normalContentTop = normalTop - ${inset}，normalContentH = normalH + ${inset}。</div>`,
         "<div>2) 3:4特例：输入 864×1184 时，图片展示块直接铺满 [x=0, y=0, w=屏宽, h=panelTop]。</div>",
-        "<div>3) 非3:4走通用分支：fitH = 屏宽×图高/图宽；fitH ≤ normalContentH 用常规居中（含13pt顶部边距）；fitH ≤ expandedH 用借顶部居中；否则缩宽保全图。</div>",
+        "<div>3) 非3:4时按三步判断：先看图片按屏幕同宽后能不能放进常规展示区（含13pt顶部预留），能放就常规居中；放不下再尝试上借顶部空间；还放不下就缩窄宽度，保证整图都能看到。</div>",
         "<div><strong>各尺寸在该策略下</strong></div>"
       ];
       el.strategyNote.innerHTML = introLines.concat(lines.map((line) => `<div>${line}</div>`)).join("");
