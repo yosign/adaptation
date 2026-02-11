@@ -531,7 +531,7 @@
       const lines = presets.map((preset) => strategyLineForPreset(preset, strategy));
       const introLines = [
         "<div><strong>完整策略（适配方案1）</strong></div>",
-        `<div>1) 先定展示边界：normalTop = safeArea + 顶部操作栏(66) + gap(0)，panelTop = 屏高 - 底部UI，normalH = panelTop - normalTop；常规居中额外加顶部边距 ${inset}pt，normalContentTop = normalTop + ${inset}，normalContentH = normalH - ${inset}。</div>`,
+        `<div>1) 先定展示边界：normalTop = safeArea + 顶部操作栏(66) + gap(0)，panelTop = 屏高 - 底部UI，normalH = panelTop - normalTop；常规居中按顶部偏移 ${inset}pt 修正，normalContentTop = normalTop - ${inset}，normalContentH = normalH + ${inset}。</div>`,
         "<div>2) 3:4特例：输入 864×1184 时，图片展示块直接铺满 [x=0, y=0, w=屏宽, h=panelTop]。</div>",
         "<div>3) 非3:4走通用分支：fitH = 屏宽×图高/图宽；fitH ≤ normalContentH 用常规居中（含13pt顶部边距）；fitH ≤ expandedH 用借顶部居中；否则缩宽保全图。</div>",
         "<div><strong>各尺寸在该策略下</strong></div>"
@@ -568,8 +568,8 @@
       const panelTop = phone.height - phone.bottomPanelH;
       const normalH = Math.max(0, panelTop - normalTop);
       const normalHeadInset = strategy.normalHeadInset || 0;
-      const normalContentTop = normalTop + normalHeadInset;
-      const normalContentH = Math.max(0, normalH - normalHeadInset);
+      const normalContentTop = normalTop - normalHeadInset;
+      const normalContentH = Math.max(0, normalH + normalHeadInset);
       const expandedTop = 0;
       const expandedH = panelTop - expandedTop;
       const fitH = phone.width * ratioHW;
